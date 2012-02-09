@@ -1,5 +1,5 @@
 all:
-	jekyll web web.out
+	jekyll --pygments web web.out
 
 serve:
 	jekyll --serve --auto web web.out

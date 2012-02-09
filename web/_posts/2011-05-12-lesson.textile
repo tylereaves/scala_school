@@ -11,22 +11,22 @@ h2. Futures
 
 Finagle uses <code>com.twitter.util.Future</code>[1] to express delayed operations. Futures are highly expressive and composable, allowing for the succinct expression of concurrent and sequential operations with great clarity. Futures are a handle for a value not yet available, with methods to register callbacks to be invoked when the value becomes available. They invert the "traditional" model of asynchronous computing which typically expose APIs similar to this:
 
-<pre>
+{% highlight scala %}
 Callback<R> cb = new Callback<R>() {
   void onComplete(R result) { … }
   void onFailure(Throwable error) { … }
 }
 
 dispatch(req, cb);
-</pre>
+{% endhighlight %}
 
 Here, the <code>Callback.onComplete</code> is invoked when the result of the <code>dispatch</code> operation is available, and <code>Callback.onFailure</code> if the operation fails. With futures, we instead invert this control flow:
 
-<pre>
+{% highlight scala %}
 val future = dispatch(req)
 future onSuccess { value => … }
 future onFailure { error => … }
-</pre>
+{% endhighlight %}
 
 Futures themselves have combinators similar to those we've encountered before in the various collections APIs. Combinators work by exploiting a uniform API, wrapping some underlying <code>Future</code> with new behavior without modifying that underlying <code>Future</code>.
 
@@ -42,20 +42,20 @@ The most important <code>Future</code> combinator is <code>flatMap</code>[2]:
 
 As an example, let's assume we have methods <code>authenticate: Request -> User</code>, and <code>rateLimit: User -> Boolean</code>, then the following code:
 
-<pre>
+{% highlight scala %}
 val f = authenticate(request) flatMap { u =>
   rateLimit(u) map { r => (u, r)
 }
-</pre>
+{% endhighlight %}
 
 With the help of for-comprehensions, we can write the above as:
 
-<pre>
+{% highlight scala %}
 val f = for {
   u <- authenticate(request)
   r <- rateLimit(u)
 } yield (u, r)
-</pre>
+{% endhighlight %}
 
 produces a future <code>f: Future[(User, Boolean)]</code> that provides both the user object and and a boolean indicating whether that user has been rate limited. Note how sequential composition is required here: <code>rateLimit</code> takes as an argument the output of <code>authenticate</code>
 
@@ -63,14 +63,14 @@ h3. Concurrent composition
 
 There are also a number of concurrent combinators. Generally these convert a sequence of <code>Future</code> into a <code>Future</code> of sequence, in slightly different ways:
 
-<pre>
+{% highlight scala %}
 object Future {
   …
   def collect[A](fs: Seq[Future[A]]): Future[Seq[A]]
   def join(fs: Seq[Future[_]]): Future[Unit]
   def select(fs: Seq[Future[A]]) : Future[(Try[A], Seq[Future[A]])]
 }
-</pre>
+{% endhighlight %}
 
 <code>collect</code> is the most straightforward one: given a set of <code>Future</code>s of the same type, we are given a <code>Future</code> of a sequence of values of that type. This future is complete when all of the underlying futures have completed, or when any of them have failed.
 
@@ -80,7 +80,7 @@ object Future {
 
 In combination, this allows for powerful and concise expression of operations typical of network services. This hypothetical code performs rate limiting (in order to maintain a local rate limit cache) concurrently with dispatching a request on behalf of the user to the backend:
 
-<pre>
+{% highlight scala %}
 def serve(request: Request): Future[Response] = {
   val userLimit: Future[(User, Boolean)] =
     for {
@@ -100,7 +100,7 @@ def serve(request: Request): Future[Response] = {
     }
   }
 }
-</pre>
+{% endhighlight %}
 
 This hypothetical example combines both sequential and concurrent composition. Also note how there is no explicit error handling other than converting a rate limiting reply to an exception. If any future fails here, it is automatically propagated to the returned <code>Future</code>.
 
@@ -114,7 +114,7 @@ A <code>Service</code> is a function <code>Req => Future[Rep]</code> for some re
 
 A simple HTTP client might do:
 
-<pre>
+{% highlight scala %}
 service: Service[HttpRequest, HttpResponse]
 
 val f = service(HttpRequest("/", HTTP_1_1))
@@ -123,11 +123,11 @@ f onSuccess { res =>
 } onFailure { exc =>
   println("failed :-(", exc)
 }
-</pre>
+{% endhighlight %}
 
 Servers implement <code>Service</code>:
 
-<pre>
+{% highlight scala %}
 class MyServer 
   extends Service[HttpRequest, HttpResponse]
 {
@@ -140,11 +140,11 @@ class MyServer
     }
   }
 }
-</pre>
+{% endhighlight %}
 
 Combining them is easy. A simple proxy might look like this:
 
-<pre>
+{% highlight scala %}
 class MyServer(client: Service[..])
   extends Service[HttpRequest, HttpResponse]
 {
@@ -154,7 +154,7 @@ class MyServer(client: Service[..])
     }
   }
 }
-</pre>
+{% endhighlight %}
 
 where <code>rewriteReq</code> and <code>rewriteRes</code> can provide protocol translation, for example.
 
@@ -162,25 +162,25 @@ h2. Filters
 
 Filters are service transformers. They are useful both for providing functionality that's <em>service generic</em> as well as factoring a given service into distinct phases.
 
-<pre>
+{% highlight scala %}
 abstract class Filter[-ReqIn, +RepOut, +ReqOut, -RepIn]
   extends ((ReqIn, Service[ReqOut, RepIn]) => Future[RepOut])
-</pre>
+{% endhighlight %}
 
 Its type is better viewed diagramatically:
 
-<pre>
+{% highlight scala %}
     ((ReqIn, Service[ReqOut, RepIn]) 
          => Future[RepOut])
 
 
            (*   Service   *)
 [ReqIn -> (ReqOut -> RepIn) -> RepOut]
-</pre>
+{% endhighlight %}
 
 Here's how you might write a filter that provides a service timeout mechanism.
 
-<pre>
+{% highlight scala %}
 class TimeoutFilter[Req, Rep](
     timeout: Duration, timer: util.Timer)
   extends Filter[Req, Rep, Req, Rep]
@@ -193,11 +193,11 @@ class TimeoutFilter[Req, Rep](
     }
   }
 }
-</pre>
+{% endhighlight %}
 
 This example shows how you might provide authentication (via an authentication service) in order to convert a <code>Service[AuthHttpReq, HttpRep]</code> into <code>Service[HttpReq, HttpRep]</code>.
 
-<pre>
+{% highlight scala %}
 class RequireAuthentication(authService: AuthService)
   extends Filter[HttpReq, HttpRep, AuthHttpReq, HttpRep]
 {
@@ -214,11 +214,11 @@ class RequireAuthentication(authService: AuthService)
     }
   }
 }
-</pre>
+{% endhighlight %}
 
 Filters compose together with <code>andThen</code>. Providing a <code>Service</code> as an argument to <code>andThen</code> creates a (filtered) <code>Service</code> (types provided for illustration).
 
-<pre>
+{% highlight scala %}
 val authFilter: Filter[HttpReq, HttpRep, AuthHttpReq, HttpRep]
 val timeoutfilter[Req, Rep]: Filter[Req, Rep, Req, Rep]
 val serviceRequiringAuth: Service[AuthHttpReq, HttpRep]
@@ -228,7 +228,7 @@ val authenticateAndTimedOut: Filter[HttpReq, HttpRep, AuthHttpReq, HttpRep] =
 
 val authenticatedTimedOutService: Service[HttpReq, HttpRep] =
   authenticateAndTimedOut andThen serviceRequiringAuth
-</pre>
+{% endhighlight %}
 
 h2. Builders
 
@@ -236,7 +236,7 @@ Finally, builders put it all together. A <code>ClientBuilder</code> produces a <
 
 Here's an example <code>ClientBuilder</code> invocation (types provided for illustration):
 
-<pre>
+{% highlight scala %}
 val client: Service[HttpRequest, HttpResponse] = ClientBuilder()
   .codec(Http)
   .hosts("host1.twitter.com:10000,host2.twitter.com:10001,host3.twitter.com:10003")
@@ -245,11 +245,11 @@ val client: Service[HttpRequest, HttpResponse] = ClientBuilder()
   .retries(2)
   .reportTo(new OstrichStatsReceiver)
   .build()
-</pre>
+{% endhighlight %}
 
 This builds a client that load balances over the 3 given hosts, establishing at most 1 connection per host, and giving up only after 2 failures. Stats are reported to "ostrich":https://github.com/twitter/ostrich. The following builder options are required (and their presence statically enforced): <code>hosts</code> or <code>cluster</code>, <code>codec</code> and <code>hostConnectionLimit</code>.
 
-<pre>
+{% highlight scala %}
 val myService: Service[HttpRequest, HttpResponse] = // provided by the user
 ServerBuilder()
   .codec(Http)
@@ -258,7 +258,7 @@ ServerBuilder()
   .name("myHttpServer")
   .bindTo(new InetSocketAddress(serverPort))
   .build(myService)
-</pre>
+{% endhighlight %}
  
 This will serve, on port <code>serverPort</code> an HTTP server which dispatches requests to <code>myService</code>. Each connection is allowed to stay alive for up to 5 minutes, and we require a request to be sent within 2 minutes. The required <code>ServerBuilder</code> options are: <code>name</code>, <code>bindTo</code> and <code>codec</code>.
 

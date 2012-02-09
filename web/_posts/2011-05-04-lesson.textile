@@ -21,13 +21,13 @@ h3. Function Composition
 
 Let's make two helpful functions:
 
-<pre>
+{% highlight scala %}
 scala> def addUmm(x: String) = x + " umm"
 addUmm: (x: String)String
 
 scala>  def addAhem(x: String) = x + " ahem"
 addAhem: (x: String)String
-</pre>
+{% endhighlight %}
 
 h4. compose
 
@@ -35,13 +35,13 @@ compose calls the second function and then the first function.
 
 compose is f(g(x))
 
-<pre>
+{% highlight scala %}
 scala> val ummThenAhem = addAhem(_).compose(addUmm(_))
 ummThenAhem: (String) => String = <function1>
 
 scala> ummThenAhem("well")
 res0: String = well umm ahem
-</pre>
+{% endhighlight %}
 
 h4. andThen
 
@@ -49,13 +49,13 @@ andThen calls the first function and then the second.
 
 andThen is <code>g(f(x))</code>
 
-<pre>
+{% highlight scala %}
 scala> val ahemThenUmm = addAhem(_).andThen(addUmm (_))
 ahemThenUmm: (String) => String = <function1>
 
 scala> ahemThenUmm("well")
 res1: String = well ahem umm
-</pre>
+{% endhighlight %}
 
 h4. Currying vs Partial Application
 
@@ -81,7 +81,7 @@ A Partial Function is only defined for certain values of the defined type.  A Pa
 
 __Note__ <code>PartialFunction</code> is unrelated to a partially applied function that we talked about earlier.
 
-<pre>
+{% highlight scala %}
 scala> val one: PartialFunction[Int, String] = { case 1 => "one" }
 one: PartialFunction[Int,String] = <function1>
 
@@ -90,18 +90,18 @@ res0: Boolean = true
 
 scala> one.isDefinedAt(2)
 res1: Boolean = false
-</pre>
+{% endhighlight %}
 
 You can apply a partial function.
 
-<pre>
+{% highlight scala %}
 scala> one(1)
 res2: String = one
-</pre>
+{% endhighlight %}
 
 PartialFunctions can be composed with something new, called orElse, that reflects whether the PartialFunction is defined over the supplied argument.
 
-<pre>
+{% highlight scala %}
 scala> val two: PartialFunction[Int, String] = { case 2 => "two" }
 two: PartialFunction[Int,String] = <function1>
 
@@ -128,13 +128,13 @@ res27: String = one
 
 scala> res23(0)
 res28: String = something else
-</pre>
+{% endhighlight %}
 
 h4. The mystery of case.
 
 Last week we saw something curious. We saw a case statement used where a function is normally used.
 
-<pre>
+{% highlight scala %}
 scala> case class PhoneExt(name: String, ext: Int)
 defined class PhoneExt
 
@@ -143,7 +143,7 @@ extensions: List[PhoneExt] = List(PhoneExt(steve,100), PhoneExt(robey,200))
 
 scala> extensions.filter { case PhoneExt(name, extension) => extension < 200 }
 res0: List[PhoneExt] = List(PhoneExt(steve,100))
-</pre>
+{% endhighlight %}
 
 Why does this work?
 

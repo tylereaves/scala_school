@@ -19,7 +19,7 @@ h3. apply methods
 
 apply methods give you a nice syntatic sugar for when a class or object has one main use.
 
-<pre>
+{% highlight scala %}
 object FooMaker {
   def apply() = new Foo
 }
@@ -34,7 +34,7 @@ bar: Bar = Bar@47711479
 
 scala> bar()
 res8: Int = 0
-</pre>
+{% endhighlight %}
 
 Here our instance object looks like we're calling a method. More on that later!
 
@@ -43,7 +43,7 @@ h3. Objects
 
 Objects are used to hold single instances of a class. Often used for factories.
 
-<pre>
+{% highlight scala %}
 object Timer {
   var count = 0
 
@@ -52,26 +52,26 @@ object Timer {
     count
   }
 }
-</pre>
+{% endhighlight %}
 
 How to use
 
-<pre>
+{% highlight scala %}
 scala> Timer.currentCount()
 res0: Long = 1
-</pre>
+{% endhighlight %}
 
 Classes and Objects can have the same name.  The object is called a 'Companion Object'.  We commonly use Companion Objects for Factories.
 
 Here is a trivial example that only serves to remove the need to use 'new' to create an instance.
 
-<pre>
+{% highlight scala %}
 class Bar(foo: String)
 
 object Bar {
   def apply(foo: String) = new Bar(foo)
 }
-</pre>
+{% endhighlight %}
 
 
 h3. Functions are Objects
@@ -80,7 +80,7 @@ In Scala, we talk about object-functional programming often.  What does that mea
 
 A Function is a set of traits. Speficially, a function that takes one argument is an instance of a Function1 trait. This trait defines the <code>apply()</code> syntactic sugar we learned earlier, allowing you to call an object like you would a function.
 
-<pre>
+{% highlight scala %}
 cala> object addOne extends Function1[Int, Int] {
      |   def apply(m: Int): Int = m + 1
      | }
@@ -88,7 +88,7 @@ defined module AddOne
 
 scala> addOne(1)
 res2: Int = 2
-</pre>
+{% endhighlight %}
 
 There is Function1 through 22.  Why 22?  It's an arbitrary magic number.  I've never needed a function with more than 22 arguments so it seems to work out.
 
@@ -99,7 +99,7 @@ Does this mean that everytime you define a method in your class, you're actually
 
 Classes can also extend Function and those instances can be called with ().
 
-<pre>
+{% highlight scala %}
 cala> class AddOne extends Function1[Int, Int] {
      |   def apply(m: Int): Int = m + 1
      | }
@@ -110,52 +110,52 @@ plusOne: AddOne = <function1>
 
 scala> plusOne(1)
 res0: Int = 2
-</pre>
+{% endhighlight %}
 
 A nice short-hand for <code>extends Function1[Int, Int]</code> is <code>extends (Int => Int)</code>
 
-<pre>
+{% highlight scala %}
 class AddOne extends (Int => Int) {
   def apply(m: Int): Int = m + 1
 }
-</pre>
+{% endhighlight %}
 
 h3. Packages
 
 You can organize your code inside of packages.
 
-<pre>
+{% highlight scala %}
 package com.twitter.example
-</pre>
+{% endhighlight %}
 
 at the top of a file will declare everything in the file to be in that package.
 
 Values and functions cannot be outside of a class or object.  Objects are a useful tool for organizing static functions.
 
-<pre>
+{% highlight scala %}
 package com.twitter.example
 
 object colorHolder {
   val BLUE = "Blue"
   val RED = "Red"
 }
-</pre>
+{% endhighlight %}
 
 Now you can access the members directly
 
-<pre>
+{% highlight scala %}
 println("the color is: " + com.twitter.example.colorHolder.BLUE)
-</pre>
+{% endhighlight %}
 
 Notice what the scala repl says when you define this object:
 
-<pre>
+{% highlight scala %}
 scala> object colorHolder {
      |   val Blue = "Blue"
      |   val Red = "Red"
      | }
 defined module colorHolder
-</pre>
+{% endhighlight %}
 
 This gives you a small hint that the designers of Scala designed objects to be part of Scala's module system.
 
@@ -165,7 +165,7 @@ One of the most useful parts of Scala.
 
 Matching on values
 
-<pre>
+{% highlight scala %}
 val times = 1
 
 times match {
@@ -173,17 +173,17 @@ times match {
   case 2 => "two"
   case _ => "some other number"
 }
-</pre>
+{% endhighlight %}
 
 Matching with guards
 
-<pre>
+{% highlight scala %}
 times match {
   case i if i == 1 => "one"
   case i if i == 2 => "two"
   case _ => "some other number"
 }
-</pre>
+{% endhighlight %}
 
 Notice how we captured the value in the variable 'i'.
 
@@ -198,14 +198,14 @@ Remember our calculator from earlier.
 
 Let's classify them according to type.
 
-<pre>
+{% highlight scala %}
 def calcType(calc: Calculator) = calc match {
   case calc.brand == "hp" && calc.model == "20B" => "financial"
   case calc.brand == "hp" && calc.model == "48G" => "scientific"
   case calc.brand == "hp" && calc.model == "30B" => "business"
   case _ => "unknown"
 }
-</pre>
+{% endhighlight %}
 
 Wow, that's painful. Thankfully Scala provides some nice tools specifically for this.
 
@@ -213,18 +213,18 @@ h3. Case Classes
 
 case classes are used to conveniently store and match on the contents of a class. You can construct them without using new.
 
-<pre>
+{% highlight scala %}
 scala> case class Calculator(brand: String, model: String)
 defined class Calculator
 
 scala> val hp20b = Calculator("hp", "20b")
 hp20b: Calculator = Calculator(hp,20b)
 
-</pre>
+{% endhighlight %}
 
 case classes automatically have equality and nice toString methods based on the constructor arguments.
 
-<pre>
+{% highlight scala %}
 scala> val hp20b = Calculator("hp", "20b")
 hp20b: Calculator = Calculator(hp,20b)
 
@@ -233,7 +233,7 @@ hp20B: Calculator = Calculator(hp,20b)
 
 scala> hp20b == hp20B
 res6: Boolean = true
-</pre>
+{% endhighlight %}
 
 case classes can have methods just like normal classes.
 
@@ -241,7 +241,7 @@ h6. Case Classes with pattern matching
 
 case classes are designed to be used with pattern matching.  Let's simplify our calculator classifier example from earlier.
 
-<pre>
+{% highlight scala %}
 val hp20b = Calculator("hp", "20B")
 val hp30b = Calculator("hp", "30B")
 
@@ -251,31 +251,31 @@ def calcType(calc: Calculator) = calc match {
   case Calculator("hp", "30B") => "business"
   case Calculator(ourBrand, ourModel) => "Calculator: %s %s is of unknown type".format(ourBrand, ourModel)
 }
-</pre>
+{% endhighlight %}
 
 Other alternatives for that last match
 
-<pre>
+{% highlight scala %}
   case Calculator(_, _) => "Calculator of unknown type"
-</pre>
+{% endhighlight %}
 
   OR we could simply not specify that it's a Calculator at all.
 
-<pre>
+{% highlight scala %}
   case _ => "Calculator of unknown type"
-</pre>
+{% endhighlight %}
 
   OR we could re-bind the matched value with another name
 
-<pre>
+{% highlight scala %}
   case c@Calculator(_, _) => "Calculator: %s of unknown type".format(c)
-</pre>
+{% endhighlight %}
 
 h3. Exceptions
 
 Exceptions are available in Scala via a try-catch-finally syntax that uses pattern matching.
 
-<pre>
+{% highlight scala %}
 try {
   remoteCalculatorService.add(1, 2)
 } catch {
@@ -283,11 +283,11 @@ try {
 } finally {
   remoteCalculatorService.close()
 }
-</pre>
+{% endhighlight %}
 
 <code>try</code>s are also expression-oriented
 
-<pre>
+{% highlight scala %}
 val result: Int = try {
   remoteCalculatorService.add(1, 2)
 } catch {
@@ -298,7 +298,7 @@ val result: Int = try {
 } finally {
   remoteCalculatorService.close()
 }
-</pre>
+{% endhighlight %}
 
 This is not an example of excellent programming style, just an example of try-catch-finally resulting in expressions like most everything else in Scala.
 

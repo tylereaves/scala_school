@@ -32,14 +32,14 @@ h2. Getting Started
 * Download the jar:http://code.google.com/p/simple-build-tool/downloads/list
 * Create an sbt shell script that calls the jar, e.g.
 
-<pre>
+{% highlight scala %}
 java -Xmx512M -jar sbt-launch.jar "$@"
-</pre>
+{% endhighlight %}
 
 * make sure it's executable and in your path
 * run sbt to create your project
 
-<pre>
+{% highlight scala %}
 [local ~/projects]$ sbt
 Project does not exist, create new project? (y/N/s) y
 Name: sample
@@ -63,7 +63,7 @@ Getting Scala 2.8.1 ...
 [info] Building project sample 1.0-SNAPSHOT against Scala 2.8.1
 [info]    using sbt.DefaultProject with sbt 0.7.4 and Scala 2.7.7
 > 
-</pre>
+{% endhighlight %}
 
 Note that it's good form to start out with a SNAPSHOT version of your project.
 
@@ -87,7 +87,7 @@ We'll be creating a simple JSON parser for simple tweets.  Add the
 following code to
 src/main/project/com/twitter/sample/SimpleParser.scala
 
-<pre>
+{% highlight scala %}
 package com.twitter.sample
 
 case class SimpleParsed(id: Long, text: String)
@@ -107,7 +107,7 @@ class SimpleParser {
     }
   }
 }
-</pre>
+{% endhighlight %}
 
 This is ugly and buggy, but should compile.
 
@@ -115,30 +115,30 @@ h2. Testing in the Console
 
 SBT can be used both as a command line script and as a build console.  We'll be primarily using it as a build console, but most commands can be run standalone by passing the command as an argument to SBT, e.g.
 
-<pre>
+{% highlight scala %}
 sbt test
-</pre>
+{% endhighlight %}
 Note that if a command takes arguments, you need to quote the entire
 argument path, e.g.
-<pre>
+{% highlight scala %}
 sbt 'test-only com.twitter.sample.SampleSpec'
-</pre>
+{% endhighlight %}
 It's weird that way.
 
 Anyway. To start working with our code, launch sbt
 
-<pre>
+{% highlight scala %}
 [local ~/projects/sbt-sample]$ sbt
 [info] Building project sample 1.0-SNAPSHOT against Scala 2.8.1
 [info]    using sbt.DefaultProject with sbt 0.7.4 and Scala 2.7.7
 > 
-</pre>
+{% endhighlight %}
 
 SBT allows you to start a Scala REPL with all your project
 dependencies loaded. It compiles your project source before launching
 the console, providing us a quick way to bench test our parser.
 
-<pre>
+{% highlight scala %}
 > console
 [info] 
 [info] == compile ==
@@ -169,11 +169,11 @@ Type in expressions to have them evaluated.
 Type :help for more information.
 
 scala> 
-</pre>
+{% endhighlight %}
 
 Our code has compiled, and we're provide the typical Scala prompt.  We'll create a new parser, an exemplar tweet, and ensure it "works"
 
-<pre>
+{% highlight scala %}
 scala> import com.twitter.sample._            
 import com.twitter.sample._
 
@@ -187,7 +187,7 @@ scala> parser.parse(tweet)
 res0: Option[com.twitter.sample.SimpleParsed] = Some(SimpleParsed(1,"foo"}))
 
 scala> 
-</pre>
+{% endhighlight %}
 
 h2. Adding Dependencies
 
@@ -195,20 +195,20 @@ Our simple parser works for this very small set of inputs, but we want to add te
 
 SBT considers Scala files in the project/build directory to be project definitions.  Add the following to project/build/SampleProject.scala
 
-<pre>
+{% highlight scala %}
 import sbt._
 
 class SampleProject(info: ProjectInfo) extends DefaultProject(info) {
   val jackson = "org.codehaus.jackson" % "jackson-core-asl" % "1.6.1"
   val specs = "org.scala-tools.testing" % "specs_2.8.0" % "1.6.5" % "test"
 }
-</pre> 
+{% endhighlight %} 
 
 A project definition is an SBT class.  In our case we extend SBT's DefaultProject.
 
 You declare dependencies by specifing a val that is a dependency.  SBT uses reflection to scan all the dependency vals in your project and build up a dependency tree at build time.  The syntax here may be new, but this is equivalent to the maven dependency
 
-<pre>
+{% highlight scala %}
 <dependency>
   <groupId>org.codehaus.jackson</groupId>
   <artifactId>jackson-core-asl</artifactId>
@@ -220,11 +220,11 @@ You declare dependencies by specifing a val that is a dependency.  SBT uses refl
   <version>1.6.5</version>
   <scope>test</scope>
 </dependency>
-</pre>
+{% endhighlight %}
 
 Now we can pull down dependencies for our project.  From the command line (not the sbt console), run sbt update
 
-<pre>
+{% highlight scala %}
 [local ~/projects/sbt-sample]$ sbt update
 [info] Building project sample 1.0-SNAPSHOT against Scala 2.8.1
 [info]    using SampleProject with sbt 0.7.4 and Scala 2.7.7
@@ -240,7 +240,7 @@ Now we can pull down dependencies for our project.  From the command line (not t
 [info] 
 [info] Total session time: 2 s, completed Nov 24, 2010 8:47:26 AM
 [success] Build completed successfully.
-</pre>
+{% endhighlight %}
 
 You'll see that sbt retrieved the specs library.  You'll now also have a lib_managed directory, and lib_managed/scala_2.8.1/test will have specs_2.8.0-1.6.5.jar
 
@@ -249,7 +249,7 @@ h2. Adding Tests
 Now that we have a test library added, put the following code in
 src/test/scala/com/twitter/sample/SimpleParserSpec.scala
 
-<pre>
+{% highlight scala %}
 package com.twitter.sample
 
 import org.specs._
@@ -269,11 +269,11 @@ object SimpleParserSpec extends Specification {
     }
   }
 }
-</pre>
+{% endhighlight %}
 
 In the sbt console, run test
 
-<pre>
+{% highlight scala %}
 > test
 [info] 
 [info] == compile ==
@@ -323,21 +323,21 @@ In the sbt console, run test
 [info] 
 [info] Total time: 0 s, completed Nov 24, 2010 8:54:45 AM
 > 
-</pre>
+{% endhighlight %}
 
 Our test works!  Now we can add more.  One of the nice things SBT provides is a way to run triggered actions.  Prefacing an action with a tilde starts up a loop that runs the action any time source files change.  Lets run ~test and see what happens.
 
-<pre>
+{% highlight scala %}
 [info] == test ==
 [success] Successful.
 [info] 
 [info] Total time: 0 s, completed Nov 24, 2010 8:55:50 AM
 1. Waiting for source changes... (press enter to interrupt)
-</pre>
+{% endhighlight %}
 
 Now let's add the following test cases
 
-<pre>
+{% highlight scala %}
     "reject a non-JSON tweet" in {
       val tweet = """"id":1,"text":"foo""""
       parser.parse(tweet) match {
@@ -364,11 +364,11 @@ Now let's add the following test cases
         case e => e must be_==(None)
       }
     }
-</pre>
+{% endhighlight %}
 
 After we save our file, SBT detects our changes, runs tests, and informs us our parser is lame
 
-<pre>
+{% highlight scala %}
 [info] == com.twitter.sample.SimpleParserSpec ==
 [info] SimpleParserSpec
 [info] SimpleParser should
@@ -378,11 +378,11 @@ After we save our file, SBT detects our changes, runs tests, and informs us our 
 [info]   x ignore nested content
 [info]     'foo","nested":{"id' is not equal to 'foo' (SimpleParserSpec.scala:31)
 [info]   + fail on partial content
-</pre>
+{% endhighlight %}
 
 So let's rework our JSON parser to be real
 
-<pre>
+{% highlight scala %}
 package com.twitter.sample
 
 import org.codehaus.jackson._
@@ -426,11 +426,11 @@ class SimpleParser {
     }
   }
 }
-</pre>
+{% endhighlight %}
 
 This is a simple Jackson parser.  When we save, SBT recompiles our code and reruns our tests.  Getting better!
 
-<pre>
+{% highlight scala %}
 info] SimpleParser should
 [info]   + work with basic tweet
 [info]   + reject a non-JSON tweet
@@ -438,12 +438,12 @@ info] SimpleParser should
 [info]     '2' is not equal to '1' (SimpleParserSpec.scala:32)
 [info]   + fail on partial content
 [info] == com.twitter.sample.SimpleParserSpec ==
-</pre>
+{% endhighlight %}
 
 Uhoh.  We need to check for nested objects.  Let's add some ugly
 guards to our token reading loop.
 
-<pre>
+{% highlight scala %}
   def parse(str: String) = {
     val parser = parserFactory.createJsonParser(str)
     var nested = 0
@@ -480,7 +480,7 @@ guards to our token reading loop.
       None
     }
   }
-</pre>
+{% endhighlight %}
 
 And... it works!
 
@@ -490,20 +490,20 @@ At this point we can run the package command to generate a jar file.  However we
 
 The first step is include StandardProject as an SBT plugin.  Plugins are a way to introduce dependencies to your build, rather than your project.  These dependencies are defined in project/plugins/Plugins.scala.  Add the following to the Plugins.scala file.
 
-<pre>
+{% highlight scala %}
 import sbt._
 
 class Plugins(info: ProjectInfo) extends PluginDefinition(info) {
   val twitterMaven = "twitter.com" at "http://maven.twttr.com/"
   val defaultProject = "com.twitter" % "standard-project" % "0.7.14"
 }
-</pre>
+{% endhighlight %}
 
 Note that we've specified a maven repository as well as a dependency.  That's because the standard project library is hosted by us, which isn't one of the default repos sbt checks.
 
 We'll also update our project definition to extend StandardProject, include an SVN publishing trait, and define the repository we wish to publish to.  Alter SampleProject.scala to the following
 
-<pre>
+{% highlight scala %}
 import sbt._
 import com.twitter.sbt._
 
@@ -513,11 +513,11 @@ class SampleProject(info: ProjectInfo) extends StandardProject(info) with Subver
 
   override def subversionRepository = Some("http://svn.local.twitter.com/maven/")
 }
-</pre>
+{% endhighlight %}
 
 Now if we run the publish action we'll see the following
 
-<pre>
+{% highlight scala %}
 [info] == deliver ==
 IvySvn Build-Version: null
 IvySvn Build-DateTime: null
@@ -545,7 +545,7 @@ IvySvn Build-DateTime: null
 [success] Successful.
 [info] 
 [info] Total time: 4 s, completed Nov 24, 2010 10:26:47 AM
-</pre>
+{% endhighlight %}
 
 And (after some time), we can go to binaries.local.twitter.com:http://binaries.local.twitter.com/maven/com/twitter/sample/1.0-SNAPSHOT/ to see our published jar.
 
@@ -553,19 +553,19 @@ h2. Adding Tasks
 
 Tasks are Scala functions.  The simplest way to add a task is to include a val in your project definition using the task method, e.g.
 
-<pre>
+{% highlight scala %}
 lazy val print = task {log.info("a test action"); None}
-</pre>
+{% endhighlight %}
 
 If you want dependencies and a description you can add them like this
 
-<pre>
+{% highlight scala %}
 lazy val print = task {log.info("a test action"); None}.dependsOn(compile) describedAs("prints a line after compile")
-</pre>
+{% endhighlight %}
 
 If we reload our project and run the print action we'll see the following
 
-<pre>
+{% highlight scala %}
 > print
 [info] 
 [info] == print ==
@@ -575,22 +575,22 @@ If we reload our project and run the print action we'll see the following
 [info] 
 [info] Total time: 0 s, completed Nov 24, 2010 11:05:12 AM
 > 
-</pre>
+{% endhighlight %}
 
 So it works.  If you're defining a task in a single project this works just fine.  However if you're defining this in a plugin it's fairly inflexible.  I may want to
 
-<pre>
+{% highlight scala %}
 lazy val print = printAction
 def printAction = printTask.dependsOn(compile) describedAs("prints a line after compile")
 def printTask = task {log.info("a test action"); None}
-</pre>
+{% endhighlight %}
 
 This allows consumers to override the task itself, the dependencies and/or description of the task, or the action.  Most built in SBT actions follow this pattern.  As an example, we can modify the builtin package task to print the current timestamp by doing the following
 
-<pre>
+{% highlight scala %}
 lazy val printTimestamp = task { log.info("current time is " + System.currentTimeMillis); None}
 override def packageAction = super.packageAction.dependsOn(printTimestamp)
-</pre>
+{% endhighlight %}
 
 There are many examples in StandardProject of tweaking SBT defaults and adding custom tasks.
 

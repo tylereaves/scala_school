@@ -23,19 +23,19 @@ h2. Runnable/Callable
 
 Runnable has a single method that returns no value.
 
-<pre>
+{% highlight scala %}
 trait Runnable {
   def run(): Unit
 }
-</pre>
+{% endhighlight %}
 
 Callable is similar to run except that it returns a value
 
-<pre>
+{% highlight scala %}
 trait Callable[V] {
   def call(): V
 }
-</pre>
+{% endhighlight %}
 
 
 h2. Threads
@@ -46,7 +46,7 @@ On Sun JVMs, with a IO-heavy workload, we can run tens of thousands of threads o
 
 A Thread takes a Runnable.  You have to call @start@ on a Thread in order for it to run the Runnable.
 
-<pre>
+{% highlight scala %}
 scala> val hello = new Thread(new Runnable {
   def run() {
     println("hello world")
@@ -57,7 +57,7 @@ hello: java.lang.Thread = Thread[Thread-3,5,main]
 scala> hello.start
 hello world
 
-</pre>
+{% endhighlight %}
 
 When you see a class implementing Runnable, you know it's intended to run in a Thread somewhere by somebody.
 
@@ -65,7 +65,7 @@ h2. Something single-threaded
 
 Here's a code snippet that works but has problems.
 
-<pre>
+{% highlight scala %}
 import java.net.{Socket, ServerSocket}
 import java.util.concurrent.{Executors, ExecutorService}
 import java.util.Date
@@ -92,7 +92,7 @@ class Handler(socket: Socket) extends Runnable {
 }
 
 (new NetworkService(2020, 2)).run
-</pre>
+{% endhighlight %}
 
 Each request will respond with the name of the current Thread, which is always @main@.
 
@@ -100,15 +100,15 @@ The main drawback with this code is that only one request at a time can be answe
 
 You could put each request in a Thread.  Simply change
 
-<pre>
+{% highlight scala %}
 (new Handler(socket)).run()
-</pre>
+{% endhighlight %}
 
 to
 
-<pre>
+{% highlight scala %}
 (new Thread(new Handler(socket))).start()
-</pre>
+{% endhighlight %}
 
 but what if you want to reuse threads or have other policies about thread behavior?
 
@@ -121,7 +121,7 @@ You can get an @ExecutorService@ using static methods on the @Executors@ object.
 
 Here's our old blocking network server written to allow concurrent requests.
 
-<pre>
+{% highlight scala %}
 import java.net.{Socket, ServerSocket}
 import java.util.concurrent.{Executors, ExecutorService}
 import java.util.Date
@@ -153,11 +153,11 @@ class Handler(socket: Socket) extends Runnable {
 }
 
 (new NetworkService(2020, 2)).run
-</pre>
+{% endhighlight %}
 
 Here's a transcript connecting to it showing how the internal threads are re-used.
 
-<pre>
+{% highlight scala %}
 $ nc localhost 2020
 pool-1-thread-1
 
@@ -169,7 +169,7 @@ pool-1-thread-1
 
 $ nc localhost 2020
 pool-1-thread-2
-</pre>
+{% endhighlight %}
 
 
 h2. Futures
@@ -178,29 +178,29 @@ A @Future@ represents an asynchronous computation.  You can wrap your computatio
 
 A @FutureTask@ is a Runnable and is designed to be run by an @Executor@
 
-<pre>
+{% highlight scala %}
 val future = new FutureTask[String](new Callable[String]() {
   def call(): String = {
     searcher.search(target);
 }})
 executor.execute(future)
-</pre>
+{% endhighlight %}
 
 Now I need the results so let's block until its done.
 
-<pre>
+{% highlight scala %}
 val blockingResult = future.get()
-</pre>
+{% endhighlight %}
 
 h2. Thread Safety
 
-<pre>
+{% highlight scala %}
 class Person(var name: String) {
   def set(changedName: String) {
     name = changedName
   }
 }
-</pre>
+{% endhighlight %}
 
 This program is not safe in a multi-threaded environment.  If two threads have references to the same instance of an Adder and call @add@, you can't predict what @i@ will be at the end of both calls.  It could be 2, it could be 1!
 
@@ -216,7 +216,7 @@ Mutexes provide ownership semantics.  When you enter a mutex, you own it.  The m
 
 In the JVM, you can synchronize on any instance that's not null.
 
-<pre>
+{% highlight scala %}
 class Person(var name: String) {
   def set(changedName: String) {
     this.synchronized {
@@ -224,7 +224,7 @@ class Person(var name: String) {
     }
   }
 }
-</pre>
+{% endhighlight %}
 
 
 
@@ -234,19 +234,19 @@ With Java 5's change to the memory model, volatile and synchronized are basicall
 
 @synchronized@ allows for more fine-grained locking.  @volatile@ synchronizes on every access.
 
-<pre>
+{% highlight scala %}
 class Person(@volatile var name: String) {
   def set(changedName: String) {
     name = changedName
   }
 }
-</pre>
+{% endhighlight %}
 
 h4. AtomicReference
 
 Also in Java 5, a whole raft of low-level concurrency primitives were added. One of them is an @AtomicReference@ class
 
-<pre>
+{% highlight scala %}
 import java.util.concurrent.atomic.AtomicReference
 
 class Person(val name: AtomicReference[String]) {
@@ -254,7 +254,7 @@ class Person(val name: AtomicReference[String]) {
     name.set(changedName)
   }
 }
-</pre>
+{% endhighlight %}
 
 h4. Does this cost anything?
 
@@ -275,14 +275,14 @@ h2. CountDownLatch
 
 A @CountDownLatch@ is a simple mechanism for multiple threads to communicate with each other.
 
-<pre>
+{% highlight scala %}
 val doneSignal = new CountDownLatch(2)
 doAsyncWork(1)
 doAsyncWork(2)
 
 doneSignal.await()
 println("both workers finished!")
-</pre>
+{% endhighlight %}
 
 Among other things, it's great for unit tests.  Let's say you're doing some async work and want to ensure that functions are completing.  Simply have your functions @countDown@ the latch and @await@ in the test.
 
@@ -306,7 +306,7 @@ This is written in a naive way assuming only single-threaded access.
 
 Note the alternative default constructor @this()@ that uses a @mutable.HashMap@
 
-<pre>
+{% highlight scala %}
 import scala.collection.mutable
 
 case class User(name: String, id: Int)
@@ -329,7 +329,7 @@ class InvertedIndex(val userMap: mutable.Map[String, User]) {
     }
   }
 }
-</pre>
+{% endhighlight %}
 
 I've left out how to get users out of our index for now.  We'll get to that later.
 
@@ -341,7 +341,7 @@ Since userMap isn't thread-safe, how we do we keep only a single thread at a tim
 
 You might consider locking on userMap while adding.
 
-<pre>
+{% highlight scala %}
 def add(user: User) {
   userMap.synchronized {
     tokenizeName(user.name).foreach { term =>
@@ -349,11 +349,11 @@ def add(user: User) {
     }
   }
 }
-</pre>
+{% endhighlight %}
 
 Unfortunately, this is too coarse.  Always try to do as much expensive work outside of the mutex as possible.  Remember what I said about locking being cheap if there is no contention.  If you do less work inside of a block, there will be less contention.
 
-<pre>
+{% highlight scala %}
 def add(user: User) {
   // tokenizeName was measured to be the most expensive operation.
   val tokens = tokenizeName(user.name)
@@ -364,7 +364,7 @@ def add(user: User) {
     }
   }
 }
-</pre>
+{% endhighlight %}
 
 h2. SynchronizedMap
 
@@ -373,13 +373,13 @@ We can mixin synchronization with a mutable HashMap using the SynchronizedMap tr
 We can extend our existing InvertedIndex to give users an easy way to build the synchronized index.
 
 
-<pre>
+{% highlight scala %}
 import scala.collection.mutable.SynchronizedMap
 
 class SynchronizedInvertedIndex(userMap: mutable.Map[String, User]) extends InvertedIndex(userMap) {
   def this() = this(new mutable.HashMap[String, User] with SynchronizedMap[String, User])
 }
-</pre>
+{% endhighlight %}
 
 If you look at the implementation, you realize that it's simply synchronizing on every method so while it's safe, it might not have the performance you're hoping for.
 
@@ -389,7 +389,7 @@ Java comes with a nice thread-safe ConcurrentHashMap.  Thankfully, we can use Ja
 
 In fact, we can seamlessly layer our new, thread-safe InvertedIndex as an extension of the old unsafe one.
 
-<pre>
+{% highlight scala %}
 import java.util.concurrent.ConcurrentHashMap
 import scala.collection.JavaConversions._
 
@@ -398,13 +398,13 @@ class ConcurrentInvertedIndex(userMap: collection.mutable.ConcurrentMap[String, 
 
   def this() = this(new ConcurrentHashMap[String, User])
 }
-</pre>
+{% endhighlight %}
 
 h2. Let's load our InvertedIndex
 
 h3. The naive way
 
-<pre>
+{% highlight scala %}
 
 trait UserMaker {
   def makeUser(line: String) = line.split(",") match {
@@ -419,7 +419,7 @@ class FileRecordProducer(path: String) extends UserMaker {
     }
   }
 }
-</pre>
+{% endhighlight %}
 
 For every line in our file, we call @makeUser@ and then @add@ it to our InvertedIndex.  If we use a concurrent InvertedIndex, we can call add in parallel and since makeUser has no side-effects, it's already thread-safe.
 
@@ -429,7 +429,7 @@ h3.  A solution: Producer/Consumer
 
 A common pattern for async computation is to separate producers from consumers and have them only communicate via a @Queue@.  Let's walk through how that would work for our search engine indexer.
 
-<pre>
+{% highlight scala %}
 import java.util.concurrent.{BlockingQueue, LinkedBlockingQueue}
 
 // Concrete producer
@@ -477,4 +477,4 @@ val pool = Executors.newFixedThreadPool(cores)
 for (i <- i to cores) {
   pool.submit(new IndexerConsumer[String](index, q))
 }
-</pre>
+{% endhighlight %}

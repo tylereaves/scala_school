@@ -18,9 +18,9 @@ According to Pierce: "A type system is a syntactic method for automatically chec
 
 Types allow you to denote function domain & codomains. For example, from mathematics, we are used to seeing:
 
-<pre>
+{% highlight scala %}
 f: R -> N
-</pre>
+{% endhighlight %}
 
 this tells us that function "f" maps values from the set of real numbers to values of the set of natural numbers.
 
@@ -49,43 +49,43 @@ Polymorphism is used in order to write generic code (for values of different typ
 
 For example, without parametric polymorphism, a generic list data structure would always look like this (and indeed it did look like this in Java prior to generics):
 
-<pre>
+{% highlight scala %}
 scala> 2 :: 1 :: "bar" :: "foo" :: Nil
 res5: List[Any] = List(2, 1, bar, foo)
-</pre>
+{% endhighlight %}
 
 Now we cannot recover any type information about the individual members.
 
-<pre>
+{% highlight scala %}
 scala> res5.head
 res6: Any = 2
-</pre>
+{% endhighlight %}
 
 And so our application would devolve into a series of casts ("asInstanceOf[]") and we would lack typesafety (because these are all dynamic).
 
 Polymorphism is achieved through specifying _type variables_.
 
-<pre>
+{% highlight scala %}
 scala> def drop1[A](l: List[A]) = l.tail
 drop1: [A](l: List[A])List[A]
 
 scala> drop1(List(1,2,3))
 res1: List[Int] = List(2, 3)
-</pre>
+{% endhighlight %}
 
 h4. Scala has rank-1 polymorphism
 
 Suppose you had some function
 
-<pre>
+{% highlight scala %}
 def toList[A](a: A) = List(a)
-</pre>
+{% endhighlight %}
 
 which you wished to use generically:
 
-<pre>
+{% highlight scala %}
 def foo[A, B](f: A => List[A], b: B, c: Int) = (f(b), f(c))
-</pre>
+{% endhighlight %}
 
 This does not compile, because all type variables have to be fixed at the invocation site.
 
@@ -99,22 +99,22 @@ Scala's type inference system works a little differently, but it's similar in sp
 
 In Scala, for example, you cannot do the following:
 
-<pre>
+{% highlight scala %}
 scala> { x => x }
 <console>:7: error: missing parameter type
        { x => x }
-</pre>
+{% endhighlight %}
 
 Whereas in OCaml, you can:
 
-<pre>
+{% highlight scala %}
 # fun x -> x;;
 - : 'a -> 'a = <fun>
-</pre>
+{% endhighlight %}
 
 In scala all type inference is _local_.  For example:
 
-<pre>
+{% highlight scala %}
 scala> def id[T](x: T) = x
 id: [T](x: T)T
 
@@ -126,7 +126,7 @@ x: java.lang.String = hey
 
 scala> val x = id(Array(1,2,3,4))
 x: Array[Int] = Array(1, 2, 3, 4)
-</pre>
+{% endhighlight %}
 
 Types are now preserved, The Scala compiler infers the type parameter for us. Note also how we did not have to specify the return type explicitly.
 
@@ -140,7 +140,7 @@ Scala's type system has to account for class hierarchies together with polymorph
 
 The subtype relationship really means: for a given type T, if T' is a subtype, can you substitute it?
 
-<pre>
+{% highlight scala %}
 scala> class Covariant[+A]
 defined class Covariant
 
@@ -153,9 +153,9 @@ scala> val cv: Covariant[String] = new Covariant[AnyRef]
  required: Covariant[String]
        val cv: Covariant[String] = new Covariant[AnyRef]
                                    ^
-</pre>
+{% endhighlight %}
 
-<pre>
+{% highlight scala %}
 scala> class Contravariant[-A]
 defined class Contravariant
 
@@ -168,17 +168,17 @@ scala> val fail: Contravariant[AnyRef] = new Contravariant[String]
  required: Contravariant[AnyRef]
        val fail: Contravariant[AnyRef] = new Contravariant[String]
                                      ^
-</pre>
+{% endhighlight %}
 
 Contravariance seems strange. When is it used? Somewhat surprising!
 
-<pre>
+{% highlight scala %}
 trait Function1 [-T1, +R] extends AnyRef
-</pre>
+{% endhighlight %}
 
 If you think about this from the point of view of substitution, it makes a lot of sense. Let's first define a simple class hierarchy:
 
-<pre>
+{% highlight scala %}
 scala> class A
 defined class A
 
@@ -190,9 +190,9 @@ defined class C
 
 scala> class D extends C
 defined class D
-</pre>
+{% endhighlight %}
 
-<pre>
+{% highlight scala %}
 scala> val f: (B => C) = ((b: B) => new C)
 f: (B) => C = <function1>
 
@@ -212,13 +212,13 @@ scala> val f: (B => C) = ((c: C) => new C)
        val f: (B => C) = ((c: C) => new C)
                                  ^
                                     ^
-</pre>
+{% endhighlight %}
 
 h3. Bounds
 
 Scala allows you to restrict polymorphic variables using _bounds_. These bounds express subtype relationships.
 
-<pre>
+{% highlight scala %}
 scala> class F { def foo = "F" }
 defined class F
 
@@ -235,38 +235,38 @@ callFoo: [T <: F](foos: scala.collection.mutable.Seq[T])Unit
 scala> callFoo(Seq(new E, new F))
 E
 F
-</pre>
+{% endhighlight %}
 
 Lower type bounds are also supported. They go hand-in-hand with contravariance. Let's say we had some class Node:
 
-<pre>
+{% highlight scala %}
 scala> class Node[T](x: T) { def sub(v: T): Node[T] = new Node(v) }
-</pre>
+{% endhighlight %}
 
 But, we want to make it covariant in T:
 
-<pre>
+{% highlight scala %}
 scala> class Node[+T](x: T) { def sub(v: T): Node[T] = new Node(v) }
 <console>:6: error: covariant type T occurs in contravariant position in type T of value v
        class Node[+T](x: T) { def sub(v: T): Node[T] = new Node(v) }
                                       ^
-</pre>
+{% endhighlight %}
 
 Recall that method arguments are contravariant, and so if we perform our substitution trick, using the same classes as before:
 
-<pre>
+{% highlight scala %}
 class Node[B](x: B) { def sub(v: B): Node[B] = new Node(v) }
-</pre>
+{% endhighlight %}
 
 is *not* a subtype of
 
-<pre>
+{% highlight scala %}
 class Node[A](x: A) { def sub(v: A): Node[A] = new Node(v) }
-</pre>
+{% endhighlight %}
 
 because A cannot be substituted for B in the argument of "sub". However, we can use lower bounding to enforce correctness.
 
-<pre>
+{% highlight scala %}
 scala> class Node[+T](x: T) { def sub[U >: T](v: U): Node[U] = new Node(v) }
 defined class Node
 
@@ -281,7 +281,7 @@ res7: Node[C] = Node@6924181b
 
 scala> (((new Node(new B)).sub(new B)).sub(new A)).sub(new C)
 res8: Node[A] = Node@3088890d
-</pre>
+{% endhighlight %}
 
 Note also how the type changes with subsequent calls to "sub".
 
@@ -289,44 +289,44 @@ h3. Quantification
 
 Sometimes you do not care to be able to name a type variable, for example:
 
-<pre>
+{% highlight scala %}
 scala> def count[A](l: List[A]) = l.size
 count: [A](List[A])Int
-</pre>
+{% endhighlight %}
 
 Instead you can use "wildcards":
 
-<pre>
+{% highlight scala %}
 scala> def count(l: List[_]) = l.size
 count: (List[_])Int
-</pre>
+{% endhighlight %}
 
 This is shorthand for:
 
-<pre>
+{% highlight scala %}
 scala> def count(l: List[T forSome { type T }]) = l.size
 count: (List[T forSome { type T }])Int
-</pre>
+{% endhighlight %}
 
 Note that quantification can get tricky:
 
-<pre>
+{% highlight scala %}
 scala> def drop1(l: List[_]) = l.tail
 drop1: (List[_])List[Any]
-</pre>
+{% endhighlight %}
 
 Suddenly we lost type information! To see what's going on, revert to the heavy-handed syntax:
 
-<pre>
+{% highlight scala %}
 scala> def drop1(l: List[T forSome { type T }]) = l.tail
 drop1: (List[T forSome { type T }])List[T forSome { type T }]
-</pre>
+{% endhighlight %}
 
 We can't say anything about T because the type does not allow it.
 
 You may also apply bounds to wildcard type variables:
 
-<pre>
+{% highlight scala %}
 scala> def hashcodes(l: Seq[_ <: AnyRef]) = l map (_.hashCode)
 hashcodes: (Seq[_ <: AnyRef])Seq[Int]
 
@@ -341,4 +341,4 @@ You can safely force boxing by casting x.asInstanceOf[AnyRef].
 
 scala> hashcodes(Seq("one", "two", "three"))
 res1: Seq[Int] = List(110182, 115276, 110339486)
-</pre>
+{% endhighlight %}

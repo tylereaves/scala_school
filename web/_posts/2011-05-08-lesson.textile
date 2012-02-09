@@ -345,7 +345,7 @@ res0: Iterable[Int] = List(1, 2)
 
 Same with Seq
 
-<pre>
+{% highlight scala %}
 scala> Seq(1, 2)
 res3: Seq[Int] = List(1, 2)
 
@@ -355,14 +355,14 @@ res1: Iterable[Int] = List(1, 2)
 scala> Sequence(1, 2)
 warning: there were deprecation warnings; re-run with -deprecation for details
 res2: Seq[Int] = List(1, 2)
-</pre>
+{% endhighlight %}
 
 Set
 
-<pre>
+{% highlight scala %}
 scala> Set(1, 2)
 res31: scala.collection.immutable.Set[Int] = Set(1, 2)
-</pre>
+{% endhighlight %}
 
 
 
@@ -399,7 +399,7 @@ h3. HashMap
 getOrElseUpdate
 +=
 
-<pre>
+{% highlight scala %}
 scala> val numbers = collection.mutable.Map(1 -> 2)
 numbers: scala.collection.mutable.Map[Int,Int] = Map((1,2))
 
@@ -414,7 +414,7 @@ res55: scala.collection.mutable.Map[Int,Int] = Map((2,3), (1,2))
 
 scala> numbers += (4 -> 1)
 res56: numbers.type = Map((2,3), (4,1), (1,2))
-</pre>
+{% endhighlight %}
 
 h3. ListBuffer and ArrayBuffer
 
@@ -437,18 +437,18 @@ h2. Life with Java
 
 You can easily move between Java and Scala collection types using a set of implicit conversions that are available in the JavaConversions package.
 
-<pre>
+{% highlight scala %}
    import scala.collection.JavaConversions._
    val sl = new scala.collection.mutable.ListBuffer[Int]
    val jl : java.util.List[Int] = sl
    val sl2 : scala.collection.mutable.Buffer[Int] = jl
    assert(sl eq sl2)
-</pre>
+{% endhighlight %}
 
 
 Two way conversions:
 
-<pre>
+{% highlight scala %}
 scala.collection.Iterable <=> java.lang.Iterable
 scala.collection.Iterable <=> java.util.Collection
 scala.collection.Iterator <=> java.util.{ Iterator, Enumeration }
@@ -456,12 +456,12 @@ scala.collection.mutable.Buffer <=> java.util.List
 scala.collection.mutable.Set <=> java.util.Set
 scala.collection.mutable.Map <=> java.util.{ Map, Dictionary }
 scala.collection.mutable.ConcurrentMap <=> java.util.concurrent.ConcurrentMap
-</pre>
+{% endhighlight %}
 
 In addition, the following one way conversions are provided:
-<pre>
+{% highlight scala %}
 scala.collection.Seq => java.util.List
 scala.collection.mutable.Seq => java.util.List
 scala.collection.Set => java.util.Set
 scala.collection.Map => java.util.Map
-</pre>
+{% endhighlight %}
